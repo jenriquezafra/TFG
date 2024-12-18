@@ -1,2 +1,2 @@
 # TFG
-Stochastical dynamics of populations
+STOCHASTICHAL DYNAMICS OF POPULATIONS
