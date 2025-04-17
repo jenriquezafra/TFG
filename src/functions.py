@@ -1,3 +1,7 @@
+import numpy as np
+from scipy.integrate import solve_ivp
+
+
 ########################## Parte determinista ###########################
 def system(t,x,r,a):
     '''
@@ -8,7 +12,7 @@ def system(t,x,r,a):
     '''
     N = len(x)
     dxdt = np.zeros(N)
-    for i in range(N):
+    for i in range(N):  
         interaction = np.sum(a[i,:]*x)
         dxdt[i] = r[i] * x[i] * (1 - interaction)
     return dxdt
@@ -68,6 +72,15 @@ def compute_LCEs(x0, r, a, max_iter):
         
 
     return LCEs, all_logs
+
+def ccr(x, y):
+    x = np.array(x)
+    y = np.array(y)
+    x_mean = np.mean(x)
+    y_mean = np.mean(y)
+    num = np.sum((x - x_mean) * (y - y_mean))
+    den = np.sqrt(np.sum((x - x_mean)**2)) * np.sqrt(np.sum((y - y_mean)**2))
+    return num / den
 
 ########################### Parte estocástica ###########################
 

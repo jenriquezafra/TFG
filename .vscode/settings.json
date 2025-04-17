@@ -1,5 +1,13 @@
 {
   "jupyter.jupyterServerType": "local",
   "jupyter.pythonPath": "/usr/local/bin/python3",
-  "jupyter.notebook.startingDirectory": "${workspaceFolder}"
+  "jupyter.notebook.startingDirectory": "${workspaceFolder}",
+
+    // fuerza la raíz del workspace para distintos motores:
+    "jupyter.notebook.startingDirectory": "${workspaceFolder}",
+    "jupyter.notebookFileRoot":        "${workspaceFolder}",
+    "python.dataScience.notebookFileRoot": "${workspaceFolder}",
+  
+    // (para versiones muy recientes de la extensión Jupyter)
+    "jupyter.notebook.defaultKernelNotebookRoot": "${workspaceFolder}"
 }
