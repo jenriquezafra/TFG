@@ -82,6 +82,45 @@ def ccr(x, y):
     den = np.sqrt(np.sum((x - x_mean)**2)) * np.sqrt(np.sum((y - y_mean)**2))
     return num / den
 
+def entropy(x):
+    # usamos la regla de sturges para el numero de bins optimo
+    bins = int(np.log(len(x)) + 1)
+    # print('bins = ',bins)
+    
+    # hallamos el histograma
+    counts, _ = np.histogram(x, bins=bins)
+    
+    # eliminamos bins vacíos para evitar log(0)
+    counts = counts[counts>0]
+    
+    # normalizamos para que sea la distribución de probabilidad
+    p = counts/np.sum(counts)
+    
+    # hallamos la entropía de shannon
+    H = -np.sum(p*np.log(p))
+    # plt.plot(x, p) #comentar el filtro para que funcione
+    return H
+
+def joint_entropy(x1, x2, x3, x4):
+    bins = int(np.log(len(x1)) + 1)
+    
+    # creamos un solo array
+    data = np.hstack((x1, x2, x3, x4))
+    
+    # hallamos el histograma multidimensional
+    hist, _ = np.histogramdd(data, bins=bins)
+    
+    # aplanar y eliminar bins con 0s
+    hist = hist.flatten() # para que sea un solo vector
+    hist_nonzero = hist[hist>0]
+    
+    # hallamos la distribución de probabilidad
+    p = hist_nonzero/np.sum(hist_nonzero)
+    
+    # hallamos entropía conjunta
+    H = -np.sum(p*np.log(p))
+    return H
+
 ########################### Parte estocástica ###########################
 
 def euler_maruyama(model, x0, t_span, dt, r, a, sigma):
