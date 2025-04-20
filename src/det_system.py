@@ -31,7 +31,7 @@ class DeterministicSystem:
             dxdt[i] = self.r[i] * x[i] * (1 - interaction)
         return dxdt
     
-    def simulation(self, n_steps = 1e5, method = 'RK45'):
+    def RK45(self, n_steps = 1e5, method = 'RK45'):
         """
         Para resolver el sistema
         :param x0: vector inicial de longitud N
