@@ -1,8 +1,7 @@
 # bytecode de Python
 __pycache__/
 *.pyc
-src/__pycache__/__init__.cpython-312.pyc
-src/__pycache__/stoc_system.cpython-312.pyc
+
 
 # checkpoints de Jupyter
 .ipynb_checkpoints/
