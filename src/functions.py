@@ -1,9 +1,15 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+from src.stoc_system import StochasticSystem
 
-
-########################## Parte determinista ###########################
 def ccr(x, y):
+    """
+    Función que calcula el coeficiente de correlación cruzada entre dos variables.
+    :param x: array de datos de la variable 1
+    :param y: array de datos de la variable 2
+    :return: coeficiente de correlación cruzada entre las dos variables
+    """
+    
     x = np.array(x)
     y = np.array(y)
     x_mean = np.mean(x)
@@ -13,6 +19,12 @@ def ccr(x, y):
     return num / den
 
 def entropy(x):
+    """
+    Función que calcula la entropía de Shannon de una variable.
+    :param x: array de datos de la variable
+    :return: entropía de Shannon de la variable
+    """
+
     # usamos la regla de sturges para el numero de bins optimo
     bins = int(np.log(len(x)) + 1)
     # print('bins = ',bins)
@@ -32,6 +44,13 @@ def entropy(x):
     return H
 
 def joint_entropy(x1, x2, x3, x4):
+    """Función que calcula la entropía conjunta de cuatro variables.
+    :param x1: array de datos de la variable 1
+    :param x2: array de datos de la variable 2
+    :param x3: array de datos de la variable 3
+    :param x4: array de datos de la variable 4
+    :return: entropía conjunta de las cuatro variables"""
+
     bins = int(np.log(len(x1)) + 1)
     
     # creamos un solo array
@@ -51,172 +70,158 @@ def joint_entropy(x1, x2, x3, x4):
     H = -np.sum(p*np.log(p))
     return H
 
-########################### Parte estocástica ###########################
+########################## Barridos de LCEs ##########################
 
-def euler_maruyama(model, x0, t_span, dt, r, a, sigma):
+def barrido_LCEs(total_time=5000, N_points=1e5, max_iters=50, save=False, save_path=None, save_name=None):
+    """Función que realiza un barrido de diferentes intensidades de ruido del sistema y devuelve un array de NumPy con los resultados.
+    :param total_time: Tiempo total de simulación
+    :param N_points: Número de puntos para el método de Euler–Maruyama (se convertirá a entero)
+    :param max_iters: Número máximo de iteraciones para el barrido (se convertirá a entero)
+    :param save: Si True, guarda los resultados en un archivo CSV
+    :param save_path: Ruta donde se guardará el archivo CSV
+    :param save_name: Nombre del archivo CSV (sin extensión)
+    :return: NumPy array de forma (max_iters, 3) con columnas [sigma, mean, std]
     """
-    Euler maruyama method
-    :param system:  función definida antes
-    :param x0: condición inicial (array de len N)
-    :param t0: tiempo inicial (float)
-    :param t_max: tiempo final (float)
-    :param dt: step del tiempo (float)
-    :param r: array con r_i
-    :param a: matriz con a_ij
-    :param sigma: array con sigma_i
-    :return: (t_vals, x_vals), con x_vals un array (num_steps+1, N)
+    import numpy as np
+    import os
+
+    # aseguramos tipos enteros donde corresponda
+    N_points = int(N_points)
+    max_iters = int(max_iters)
+    np.random.seed(2)
+
+    # parámetros del sistema
+    r = np.array([1, 0.72, 1.53, 1.27])
+    a = np.array([
+        [1, 1.09, 1.52, 0],
+        [0, 1, 0.44, 1.36],
+        [2.33, 0, 1, 0.47],
+        [1.21, 0.51, 0.35, 1]
+    ])
+    x0 = np.array([0.5, 0.5, 0.5, 0.5])
+
+    # valores de sigma a barrer
+    array_sigmas = np.linspace(start=0.0, stop=1.5, num=max_iters)
+    start_indices = [int(N_points * f) for f in (0.25, 0.5, 0.75)]
+
+    # creamos un array para guardar los resultados
+    resultados = np.zeros((max_iters, 3), dtype=float)
+
+    for idx, sigma in enumerate(array_sigmas):
+        print(f"{idx+1}/{max_iters}  sigma={sigma:.3f}...", end='\r')
+
+        # creamos el sistema estocástico con un ruido asimétrico
+        vect_ruido = sigma * np.array([0.8, 0.9, 1.0, 1.1])
+        model = StochasticSystem(
+            r, a, x0,
+            total_time=total_time,
+            dt=total_time / N_points,
+            sigma=vect_ruido
+        )
+
+        # lo resolvemos 
+        _, X = model.euler_maruyama()
+
+        # hallamos su LCE
+        _, vect_lambdas = model.estimate_LCE1_Wolf(
+            X, evol_time=500,
+            min_separation=180,
+            max_replacements=500,
+            start_indices=start_indices
+        )
+
+        # hallamos su media y std
+        mean_val = np.nanmean(vect_lambdas)
+        std_val = np.nanstd(vect_lambdas, ddof=1)
+
+        resultados[idx, 0] = sigma
+        resultados[idx, 1] = mean_val
+        resultados[idx, 2] = std_val
+
+    # guardado opcional en CSV
+    if save and save_path and save_name:
+        os.makedirs(save_path, exist_ok=True)
+        filepath = os.path.join(save_path, f"{save_name}.csv")
+        header = 'sigma,mean,std'
+        np.savetxt(filepath, resultados, delimiter=',', header=header, comments='')
+
+    return resultados
+
+
+def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50, save=False, save_path=None, save_name=None):
+    """Función que realiza un barrido de diferentes intensidades de ruido del sistema y condiciones iniciales aleatorias y devuelve un array de NumPy con los resultados.
+    :param total_time: Tiempo total de simulación
+    :param N_points: Número de puntos para el método de Euler–Maruyama (se convertirá a entero)
+    :param max_iters: Número máximo de iteraciones para el barrido (se convertirá a entero)
+    :param save: Si True, guarda los resultados en un archivo CSV
+    :param save_path: Ruta donde se guardará el archivo CSV
+    :param save_name: Nombre del archivo CSV (sin extensión)
+    :return: NumPy array de forma (max_iters, 3) con columnas [sigma, mean, std]
     """
-    
-    np.random.seed(2) 
-    N=len(x0) # en nuestro caso será 4
-    t0 = t_span[0]
-    t_max = t_span[-1]
-    num_steps = int((t_max-t0)/dt)
-    
-    # guardamos los valores 
-    t_vals = np.linspace(t0, t_max, num_steps+1)
-    x_vals = np.zeros((num_steps+1,N))
-    
-    x_vals[0, :] = x0
-    x = x0.copy()
-    
-    for n in range(num_steps): # para cada paso temporal
-        t = t_vals[n]
-        
-        # parte determinista
-        F = model(t,x,r,a) # también array de 4
+    import numpy as np
+    import os
 
-        # vector del ruido
-        for i in range(N): # para cada especie
-            # introducimos la variable aletoria
-            zetta = np.random.normal(0, 1)
-            
-            # hallamos el siguiente valor
-            x[i] = x[i]+ F[i]*dt + sigma[i]*x[i]*np.sqrt(dt)*zetta
-            
-            # si baja del umbral, suponemos que se extingue
-            if x[i] <= 1e-9:
-                x[i] = 0
-                
-            x_vals[n+1,i] = x[i]    
-    return t_vals, x_vals
-    
-def nearest_neighbour_4D(data_4d, idx, min_separation = 50):
-    '''
-    Busca el punto más cercano para el punto data_4d[idx],
-    excluyendo los puntos que están muy próximos en el tiempo.
-    
-    :param data_4d: ndarray, shape (N,4)
-    :param idx: int
-        Índice del punto de referencia
-    :param min_separation: int
-        Número mínimo de índices (pasos de tiempo) para evitar vecinos de la misma órbita
-    :return: nn_idx: int
-        Índice del vecino más cercano
-    :return dist_min: float
-        Distancia mínima encontrada
-    '''
-    
-    ref_point = data_4d[idx]
-    
-    # hallamos todas las distancias 
-    dists = np.linalg.norm(data_4d - ref_point, axis = 1)
-    # excluimos el propio punto
-    dists[idx] = np.inf
-    
-    # excluimos puntos en un rango temporal muy cercano
-    start_excl = max(0, idx - min_separation)
-    end_excl = min(len(data_4d), idx + min_separation)
-    dists[start_excl:end_excl] = np.inf
-    
-    nn_idx = np.argmin(dists)
-    dist_min = dists[nn_idx]
-    return nn_idx, dist_min
+    # aseguramos tipos enteros donde corresponda
+    N_points = int(N_points)
+    max_iters = int(max_iters)
+    np.random.seed(2)
 
-def estimate_LCE1_Wolf(data_4d, evol_time, min_separation, dt, max_replacements, start_indices):
-    '''
-    
-    Estimamos el mayor exponentes de Lyapunov usando el método 
-    de Wolf  (en fixed time) para datos en R^4
-    
-    :param data_4d: ndarray, shape (N,4)
-        Cada fila es un vector (x1, x2, x3, x4) en el instante de muestreo
-    :param evol_time: int
-        Número de pasos que se deja evolucionar cada par antes de renormalizar
-    :param min_separation: int
-        Número mínimo de pasos para excluir puntos muy próximos temporalmente
-    :param df: float 
-        Intervalo de muestreo
-    :param max_replacements: int
-        Número máximo de renormalizaciones a realizar
-    :param start_indices: list
-        Lista de índices iniciales a usar como puntos de referencia para promediar la estimación
-        
-    :return: lambda1: float
-        Estimación del mayor LCE 
-        
-    :return: lambda_estimates: array
-        Vector con la estimación de lamba1 en cada punto inicial
-    '''
-    
-    N = len(data_4d)
-        
-    # almacenamos la estimación de cada punto
-    lambda_estimates = [] 
-    
-    ## guardamos en una matriz todos los valores
-    ## son nan para hacer la media mejor a que sean 0s
-    all_vals = np.full(
-        (len(start_indices), max_replacements), np.nan)
-    
-    for i, init_idx in enumerate(start_indices):
-        idx_f = init_idx
-        log_sum = 0.0
-        count = 0
-        
-        # iteramos mientras se pueda evolucionar el punto de referencia y sin superar el máximo de iteraciones
-        while (idx_f + evol_time < N) and (count < max_replacements):
-            # buscamos vecino más cercano para el de referencia más cercano
-            idx_n, dist_init = nearest_neighbour_4D(data_4d, idx_f, min_separation)
-            
-            # vemos que la distancia inicial es valida
-            if np.isinf(dist_init) or dist_init < 1e-12:
-                break
-                
-            # definimos los índices después de la evolución
-            idx_f_next = idx_f + evol_time
-            idx_n_next = idx_n + evol_time
-            
-            if idx_f_next >= N or idx_n_next >= N:
-                break
-            
-            # calculamos la separación final
-            dist_final = np.linalg.norm(data_4d[idx_f_next] - data_4d[idx_n_next])
-            
-            # acumulamos el logaritmo del crecimiento
-            log_sum += np.log(dist_final / dist_init)
-            count += 1
-            
-            ## valor parcial acumulado
-            all_vals[i, count-1] = log_sum/(count*evol_time*dt)
-            
-            # renormalizamos
-            idx_f = idx_f_next
-        
-        if count > 0:
-            lambda_local = (log_sum / (count * evol_time * dt))
-            
-        else:
-            lambda_local =np.nan
-        
-        # guardamos el valor a la lista       
-        lambda_estimates.append(lambda_local)
+    # parámetros del sistema
+    r = np.array([1, 0.72, 1.53, 1.27])
+    a = np.array([
+        [1, 1.09, 1.52, 0],
+        [0, 1, 0.44, 1.36],
+        [2.33, 0, 1, 0.47],
+        [1.21, 0.51, 0.35, 1]
+    ])
 
-    if len(lambda_estimates) > 0:
-        # hacemos la media (quitando los nans)
-        lambda1 = np.nanmean(lambda_estimates)
+    # valores de sigma a barrer
+    array_sigmas = np.linspace(start=0.0, stop=1.5, num=max_iters)
+    start_indices = [int(N_points * f) for f in (0.25, 0.5, 0.75)]
 
-    else:
-        lambda1 = 0
-    
-    return lambda1, lambda_estimates, all_vals
+    # creamos un array para guardar los resultados
+    resultados = np.zeros((max_iters, 3), dtype=float)
+
+    for idx, sigma in enumerate(array_sigmas):
+        print(f"{idx+1}/{max_iters}  sigma={sigma:.3f}...", end='\r')
+
+        # generamos x0 aleatorio
+        rng = np.random.default_rng(idx) # para que sea reproducible
+        x0 = np.array([rng.random() for _ in range(4)])
+
+        # creamos el sistema estocástico con un ruido asimétrico
+        vect_ruido = sigma * np.array([0.8, 0.9, 1.0, 1.1])
+        model = StochasticSystem(
+            r, a, x0,
+            total_time=total_time,
+            dt=total_time / N_points,
+            sigma=vect_ruido
+        )
+
+        # lo resolvemos 
+        _, X = model.euler_maruyama()
+
+        # hallamos su LCE
+        _, vect_lambdas = model.estimate_LCE1_Wolf(
+            X, evol_time=500,
+            min_separation=180,
+            max_replacements=500,
+            start_indices=start_indices
+        )
+
+        # hallamos su media y std
+        mean_val = np.nanmean(vect_lambdas)
+        std_val = np.nanstd(vect_lambdas, ddof=1)
+
+        resultados[idx, 0] = sigma
+        resultados[idx, 1] = mean_val
+        resultados[idx, 2] = std_val
+
+    # guardado opcional en CSV
+    if save and save_path and save_name:
+        os.makedirs(save_path, exist_ok=True)
+        filepath = os.path.join(save_path, f"{save_name}.csv")
+        header = 'sigma,mean,std'
+        np.savetxt(filepath, resultados, delimiter=',', header=header, comments='')
+
+    return resultados

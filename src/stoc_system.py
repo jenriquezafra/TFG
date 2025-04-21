@@ -162,7 +162,7 @@ class StochasticSystem:
             # hallamos el max LCE estimado para este punto de referencia
             lambda_local = (log_sum / (count * evol_time * self.dt)) if count > 0 else np.nan
             lambda_estimates.append(lambda_local)
-            print(f'Iteración {i+1}/{len(start_indices)}: lambda_local = {lambda_local}') # para debug
+            # print(f'Iteración {i+1}/{len(start_indices)}: lambda_local = {lambda_local}') # para debug
 
         # hacemos la media de los LCEs estimados
         lambda1 = np.nanmean(lambda_estimates) if lambda_estimates else 0.0
