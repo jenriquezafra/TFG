@@ -148,14 +148,11 @@ def barrido_LCEs(total_time=5000, N_points=1e5, max_iters=50, save=False, save_p
     return resultados
 
 
-def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50, save=False, save_path=None, save_name=None):
+def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50):
     """Función que realiza un barrido de diferentes intensidades de ruido del sistema y condiciones iniciales aleatorias y devuelve un array de NumPy con los resultados.
     :param total_time: Tiempo total de simulación
     :param N_points: Número de puntos para el método de Euler–Maruyama (se convertirá a entero)
     :param max_iters: Número máximo de iteraciones para el barrido (se convertirá a entero)
-    :param save: Si True, guarda los resultados en un archivo CSV
-    :param save_path: Ruta donde se guardará el archivo CSV
-    :param save_name: Nombre del archivo CSV (sin extensión)
     :return: NumPy array de forma (max_iters, 3) con columnas [sigma, mean, std]
     """
     import numpy as np
@@ -216,12 +213,5 @@ def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50, save=False,
         resultados[idx, 0] = sigma
         resultados[idx, 1] = mean_val
         resultados[idx, 2] = std_val
-
-    # guardado opcional en CSV
-    if save and save_path and save_name:
-        os.makedirs(save_path, exist_ok=True)
-        filepath = os.path.join(save_path, f"{save_name}.csv")
-        header = 'sigma,mean,std'
-        np.savetxt(filepath, resultados, delimiter=',', header=header, comments='')
 
     return resultados
