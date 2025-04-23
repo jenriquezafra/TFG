@@ -82,7 +82,6 @@ def barrido_LCEs(total_time=5000, N_points=1e5, max_iters=50, save=False, save_p
     :param save_name: Nombre del archivo CSV (sin extensión)
     :return: NumPy array de forma (max_iters, 3) con columnas [sigma, mean, std]
     """
-    import numpy as np
     import os
 
     # aseguramos tipos enteros donde corresponda
@@ -155,8 +154,6 @@ def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50):
     :param max_iters: Número máximo de iteraciones para el barrido (se convertirá a entero)
     :return: NumPy array de forma (max_iters, 3) con columnas [sigma, mean, std]
     """
-    import numpy as np
-    import os
 
     # aseguramos tipos enteros donde corresponda
     N_points = int(N_points)
@@ -213,5 +210,59 @@ def barrido_LCEs_random(total_time=5000, N_points=1e5, max_iters=50):
         resultados[idx, 0] = sigma
         resultados[idx, 1] = mean_val
         resultados[idx, 2] = std_val
+
+    return resultados
+
+
+def barrido_extinciones_random(total_time=5000, N_points=1e5, max_iters=50):
+    """Función que realiza un barrido de diferentes intensidades de ruido del sistema y condiciones iniciales aleatorias y devuelve un array de NumPy con los resultados.
+    :param total_time: Tiempo total de simulación
+    :param N_points: Número de puntos para el método de Euler–Maruyama (se convertirá a entero)
+    :param max_iters: Número máximo de iteraciones para el barrido (se convertirá a entero)
+    :return: NumPy array de forma (max_iters, 2) con columnas [sigma, extinciones]
+    """
+
+    # aseguramos tipos enteros donde corresponda
+    N_points = int(N_points)
+    max_iters = int(max_iters)
+    np.random.seed(2)
+
+    # parámetros del sistema
+    r = np.array([1, 0.72, 1.53, 1.27])
+    a = np.array([
+        [1, 1.09, 1.52, 0],
+        [0, 1, 0.44, 1.36],
+        [2.33, 0, 1, 0.47],
+        [1.21, 0.51, 0.35, 1]
+    ])
+
+    # valores de sigma a barrer
+    array_sigmas = np.linspace(start=0.0, stop=1.5, num=max_iters)
+    start_indices = [int(N_points * f) for f in (0.25, 0.5, 0.75)]
+
+    # creamos un array para guardar los resultados
+    resultados = np.zeros((max_iters, 3), dtype=float)
+
+    for idx, sigma in enumerate(array_sigmas):
+        print(f"{idx+1}/{max_iters}  sigma={sigma:.3f}...", end='\r')
+
+        # generamos x0 aleatorio
+        rng = np.random.default_rng(idx) # para que sea reproducible
+        x0 = np.array([rng.random() for _ in range(4)])
+
+        # creamos el sistema estocástico con un ruido asimétrico
+        vect_ruido = sigma * np.array([0.8, 0.9, 1.0, 1.1])
+        system = StochasticSystem(
+            r, a, x0,
+            total_time=total_time,
+            dt=total_time / N_points,
+            sigma=vect_ruido
+        )
+
+        # hallamos sus extinciones
+        n_ext = system.extintions()
+        
+        resultados[idx, 0] = sigma
+        resultados[idx, 1] = n_ext
 
     return resultados

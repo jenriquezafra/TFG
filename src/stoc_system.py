@@ -77,6 +77,17 @@ class StochasticSystem:
         self.vals_t = t_vals
         self.vals_X = x_vals
         return t_vals, x_vals
+    
+    def extintions(self):
+        """
+        Hallamos el número de extinciones en el sistema
+        :return n_ext: número de extinciones (int)
+        """
+        # hallamos el número de extinciones
+        _, X = self.euler_maruyama()
+        last_row = X[-1, :]
+        n_ext = np.sum(last_row < 1e-9)
+        return n_ext
 
 
     def nearest_neighbour(self, data, index, min_sep):
