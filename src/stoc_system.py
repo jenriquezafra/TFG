@@ -95,19 +95,24 @@ class StochasticSystem:
         :param umbral: umbral de extinción (default=1e-9)
         :return t_ext: tiempo de extinción (float) o Nan si no se extingue
         """
-        t, X = self.euler_maruyama()[1]
+        t, X = self.euler_maruyama()
 
-        # hallamos el el primer valor por debajo del umbral
+        # hallamos el primer valor por debajo del umbral
+        tiempos = []
         for i in range(self.N):
-            tex_array = []
-            idx_tex = np.where(X[:, i]< umbral )[0][0] if np.any(X[:, i]< umbral) else np.nan
-            # si no se extingue, guardamos el tiempo total
-            if np.isnan(idx_tex):
-                tex_array.append(self.total_time)
+            # indices donde la especie i cae por debajo del umbral
+            idx = np.where(X[:,i] < umbral)[0]
+            if idx.size > 0:
+                tiempos.append(t[idx[0]])
             else:
-                tex_array.append(t[idx_tex])
+                tiempos.append(np.nan)
 
-            # hallamos el valor promedio
+        # hallamos el valor promedio y desv est
+        tex = np.nanmean(tiempos)
+        tex_std = np.nanstd(tiempos)
+
+        return tex, tex_std
+
 
 
 
