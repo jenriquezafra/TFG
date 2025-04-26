@@ -89,6 +89,27 @@ class StochasticSystem:
         n_ext = np.sum(last_row < 1e-9)
         return n_ext
 
+    def extintion_time(self, umbral = 1e-9):
+        """Función que halla el tiempo de extinción (promedio si se exinguen varias especies) de un sistema estocástico.
+        Se aplica al sistema antes de resolverlo (lo resolvemos internamente).
+        :param umbral: umbral de extinción (default=1e-9)
+        :return t_ext: tiempo de extinción (float) o Nan si no se extingue
+        """
+        t, X = self.euler_maruyama()[1]
+
+        # hallamos el el primer valor por debajo del umbral
+        for i in range(self.N):
+            tex_array = []
+            idx_tex = np.where(X[:, i]< umbral )[0][0] if np.any(X[:, i]< umbral) else np.nan
+            # si no se extingue, guardamos el tiempo total
+            if np.isnan(idx_tex):
+                tex_array.append(self.total_time)
+            else:
+                tex_array.append(t[idx_tex])
+
+            # hallamos el valor promedio
+
+
 
     def nearest_neighbour(self, data, index, min_sep):
         """

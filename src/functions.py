@@ -70,6 +70,7 @@ def joint_entropy(x1, x2, x3, x4):
     H = -np.sum(p*np.log(p))
     return H
 
+
 ########################## Barridos de LCEs ##########################
 
 def barrido_LCEs(total_time=5000, N_points=1e5, max_iters=50, save=False, save_path=None, save_name=None):
@@ -266,3 +267,5 @@ def barrido_extinciones_random(total_time=5000, N_points=1e5, max_iters=50):
         resultados[idx, 1] = n_ext
 
     return resultados
+
+
