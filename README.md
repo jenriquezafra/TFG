@@ -4,6 +4,7 @@ Durante la última década se ha reconocido que la organización de las comunida
 
 ## Estructura del repositorio
 
+```bash
 .
 ├── .vscode/
 │   └── settings.json           Configuraciones de VSCode (formato, linting, etc.).
@@ -48,6 +49,8 @@ Durante la última década se ha reconocido que la organización de las comunida
 ├── LICENSE               Licencia de uso y distribución (MIT).
 ├── requirements.txt      Dependencias de Python.
 └── start.sh              Script de ejecución: preprocesamiento y generación de resultados.
+
+```
 
 
 ## Ejecución
