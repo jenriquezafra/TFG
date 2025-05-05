@@ -10,49 +10,49 @@ Durante la última década se ha reconocido que la organización de las comunida
 │   └── settings.json           Configuraciones de VSCode (formato, linting, etc.).
 │
 ├── data/
-│   ├── barrido_asim.npy        Resultados de simulaciones asíncronas.
-│   ├── barrido_exts_random.npy Trayectorias con extinciones aleatorias.
-│   ├── barrido_LCEs_random.npy Cálculo de exponentes de Lyapunov con métodos aleatorios.
-│   └── barrido_sim.npy         Resultados de simulaciones síncronas.
+│   ├── barrido_asim.npy            Resultados del barrido asimétrico (deprecated)
+│   ├── barrido_exts_random.npy     Resultados del barrido de extinciones con x0 aleatorios
+│   ├── barrido_LCEs_random.npy     Resultados del barrido de LCEs con x0 aleatorios
+│   └── barrido_sim.npy             Resultados del barrido simétrico (deprecated)
 │
 ├── notebooks/
-│   ├── comparations.ipynb           Comparativa de modelos y métricas de error.
-│   ├── deterministic_system.ipynb   Análisis del sistema determinista.
-│   ├── parameters_exploration.ipynb Estudio de sensibilidad a parámetros.
-│   ├── regulated_model.ipynb        Sistema con regulación de retroalimentación.
-│   ├── stochastic_system.ipynb      Análisis del sistema estocástico.
-│   └── tests.ipynb                  Validación y pruebas de consistencia.
+│   ├── comparations.ipynb               Comparativa de modelos y métricas de error.
+│   ├── deterministic_system.ipynb       Análisis del sistema determinista.
+│   ├── parameters_exploration.ipynb     Estudio de sensibilidad a parámetros.
+│   ├── stochastic_system.ipynb          Análisis del sistema estocástico.
+│   └── tests.ipynb                  
 │
 ├── outputs/
-│   ├── barrido_LCEs_exts_random.png  Gráfica de LCE frente a extinciones.
-│   ├── comp_trayectorias_error.png   Trayectorias con error absoluto.
-│   ├── comp_trayectorias_rel.png     Trayectorias normalizadas.
-│   ├── comp_trayectorias_ruido.png   Efecto del ruido en las trayectorias.
-│   ├── comp_trayectorias.png         Comparativa general de trayectorias.
-│   ├── doble_asim.png                Dinámica en esquemas asíncronos múltiples.
-│   ├── espacio_fasico_4especies.png  Espacio de fases para cuatro especies.
-│   ├── espacio_fasico_4especies_ruido1.png  Espacio de fases con perturbación.
-│   ├── evol_temp_4especies.png       Evolución temporal de cuatro especies.
-│   ├── evol_temp_4especies_ruido1.png Evolución temporal con ruido.
-│   ├── LCE_4especies.png             Exponentes de Lyapunov en cuatro especies.
-│   ├── lces_ruido_comunes.png        LCE frente a ruido común.
-│   └── wolf_det.png                  Modelo de presa-depredador determinista.
+│   ├── barrido_LCEs_exts_random.png  
+│   ├── comp_trayectorias_error.png   
+│   ├── comp_trayectorias_rel.png     
+│   ├── comp_trayectorias_ruido.png   
+│   ├── comp_trayectorias.png         
+│   ├── doble_asim.png                
+│   ├── espacio_fasico_4especies.png  
+│   ├── espacio_fasico_4especies_ruido1.png  
+│   ├── evol_temp_4especies.png       
+│   ├── evol_temp_4especies_ruido1.png 
+│   ├── LCE_4especies.png            
+│   ├── lces_ruido_comunes.png       
+│   └── wolf_det.png                  
 │
 ├── src/
-│   ├── __init__.py       Inicialización del paquete.
-│   ├── det_system.py     Implementación del sistema determinista.
-│   ├── stoc_system.py    Implementación del sistema estocástico.
-│   ├── functions.py      Funciones auxiliares (métricas, utilidades).
-│   └── README.md         Documentación del módulo fuente.
+│   ├── __init__.py       
+│   ├── det_system.py     Implementación del sistema determinista
+│   ├── stoc_system.py    Implementación del sistema estocástico
+│   ├── functions.py      Funciones auxiliares 
+│   └── README.md         
 │
-├── .gitignore            Definición de archivos y directorios ignorados.
-├── LICENSE               Licencia de uso y distribución (MIT).
-├── requirements.txt      Dependencias de Python.
-└── start.sh              Script de ejecución: preprocesamiento y generación de resultados.
+├── .gitignore            
+├── LICENSE               
+├── requirements.txt      
+└── start.sh              
 
 ```
 
 
 ## Ejecución
+
 
 ## Módulos principales
