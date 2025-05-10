@@ -1,12 +1,6 @@
-# bytecode de Python
 __pycache__/
 *.pyc
-
-
-# checkpoints de Jupyter
 .ipynb_checkpoints/
-
-# archivos de logs
 *.log
-
+.DS_Store
 .venv/
