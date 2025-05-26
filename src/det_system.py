@@ -110,3 +110,4 @@ class DeterministicSystem:
             x = sol.y[:,-1]
 
         return LCEs, all_logs
+    

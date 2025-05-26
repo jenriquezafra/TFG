@@ -3,3 +3,4 @@ pandas == 2.2.3
 matplotlib == 3.9.0
 scipy == 1.14.1
 jupyterlab
+statsmodels == 0.14.0
