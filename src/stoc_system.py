@@ -156,7 +156,6 @@ class StochasticSystem:
         :param start_indices: lista de índices iniciales en la trayectoria para promediar
         :return: lambda1 (float), lambda_estimates (list), all_vals (ndarray)
         """
-        # resolvemos la dinámica estocástica con Euler-Maruyama
         N = len(data)
 
         # almacenamos la estimación de cada punto
