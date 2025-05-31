@@ -53,6 +53,9 @@ Durante la última década se ha reconocido que la organización de las comunida
 
 
 ## Ejecución
+Desde la raíz del proyecto, ejecuta:
+```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+```
 
-
-## Módulos principales
